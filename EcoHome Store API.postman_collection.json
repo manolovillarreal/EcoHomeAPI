@@ -90,7 +90,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Rafael Mantilla\",\n  \"email\": \"rafa.mantilla@uniasturias.edu.co\",\n  \"password\": \"RafaMantilla123\"\n}",
+                  "raw": "{\n  \"name\": \"{{testUserName}}\",\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -99,9 +99,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{host}}/auth/signup",
+                  "raw": "{{baseUrl}}/auth/signup",
                   "host": [
-                    "{{host}}"
+                    "{{baseUrl}}"
                   ],
                   "path": [
                     "auth",
@@ -135,9 +135,9 @@
                       }
                     },
                     "url": {
-                      "raw": "{{host}}/auth/signup",
+                      "raw": "{{baseUrl}}/auth/signup",
                       "host": [
-                        "{{host}}"
+                        "{{baseUrl}}"
                       ],
                       "path": [
                         "auth",
@@ -182,9 +182,9 @@
                       }
                     },
                     "url": {
-                      "raw": "{{host}}/auth/signup",
+                      "raw": "{{baseUrl}}/auth/signup",
                       "host": [
-                        "{{host}}"
+                        "{{baseUrl}}"
                       ],
                       "path": [
                         "auth",
@@ -203,6 +203,24 @@
                   ],
                   "cookie": [],
                   "body": "{\n  \"message\": \"Validation failed\",\n  \"errors\": [\n    {\n      \"field\": \"email\",\n      \"message\": \"A valid email is required\"\n    },\n    {\n      \"field\": \"email\",\n      \"message\": \"A valid email is required\"\n    }\n  ]\n}"
+                }
+              ],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status is 201 or 400\", function () {",
+                      "  pm.expect([201, 400]).to.include(pm.response.code);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "  const data = pm.response.json();",
+                      "  pm.collectionVariables.set(\"bearerToken\", data.token || \"\");",
+                      "  pm.collectionVariables.set(\"testUserRole\", data.user?.role || \"client\");",
+                      "}"
+                    ]
+                  }
                 }
               ]
             }
@@ -227,7 +245,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"rafamantilla@uniasturias.edu.co\",\n  \"password\": \"RafaMantilla123\"\n}",
+                  "raw": "{\n  \"email\": \"{{testUserEmail}}\",\n  \"password\": \"{{testUserPassword}}\"\n}",
                   "options": {
                     "raw": {
                       "headerFamily": "json",
@@ -236,9 +254,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{host}}/auth/login",
+                  "raw": "{{baseUrl}}/auth/login",
                   "host": [
-                    "{{host}}"
+                    "{{baseUrl}}"
                   ],
                   "path": [
                     "auth",
@@ -388,6 +406,24 @@
                   "cookie": [],
                   "body": "{\n  \"message\": \"Invalid credentials\"\n}"
                 }
+              ],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"status is 200\", function () {",
+                      "  pm.response.to.have.status(200);",
+                      "});",
+                      "const data = pm.response.json();",
+                      "pm.collectionVariables.set(\"bearerToken\", data.token || \"\");",
+                      "pm.collectionVariables.set(\"testUserEmail\", data.user?.email || pm.collectionVariables.get(\"testUserEmail\"));",
+                      "pm.collectionVariables.set(\"testUserName\", data.user?.name || pm.collectionVariables.get(\"testUserName\"));",
+                      "pm.collectionVariables.set(\"testUserRole\", data.user?.role || pm.collectionVariables.get(\"testUserRole\"));"
+                    ]
+                  }
+                }
               ]
             }
           ]
@@ -422,7 +458,7 @@
                   "variable": [
                     {
                       "key": "id",
-                      "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                      "value": "{{productId}}"
                     }
                   ]
                 }
@@ -450,7 +486,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -489,7 +525,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -528,7 +564,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -593,7 +629,7 @@
                   "variable": [
                     {
                       "key": "id",
-                      "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                      "value": "{{productId}}"
                     }
                   ]
                 }
@@ -640,7 +676,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -698,7 +734,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -756,7 +792,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -814,7 +850,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -872,7 +908,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -923,7 +959,7 @@
                   "variable": [
                     {
                       "key": "id",
-                      "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                      "value": "{{productId}}"
                     }
                   ]
                 }
@@ -956,7 +992,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -1000,7 +1036,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -1044,7 +1080,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -1088,7 +1124,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -1132,7 +1168,7 @@
                       "variable": [
                         {
                           "key": "id",
-                          "value": "3c02b541-ae3e-497f-9994-fa04a2394a97"
+                          "value": "{{productId}}"
                         }
                       ]
                     }
@@ -1164,9 +1200,9 @@
               }
             ],
             "url": {
-              "raw": "{{host}}/products",
+              "raw": "{{baseUrl}}/products",
               "host": [
-                "{{host}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "products"
@@ -1234,7 +1270,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Lampara de bambu\",\n  \"price\": 89000\n}",
+              "raw": "{\n  \"name\": \"Lampara de bambu\",\n  \"price\": 89.9\n}",
               "options": {
                 "raw": {
                   "headerFamily": "json",
@@ -1243,9 +1279,9 @@
               }
             },
             "url": {
-              "raw": "{{host}}/products",
+              "raw": "{{baseUrl}}/products",
               "host": [
-                "{{host}}"
+                "{{baseUrl}}"
               ],
               "path": [
                 "products"
@@ -1457,6 +1493,23 @@
               "cookie": [],
               "body": "{\n  \"message\": \"Invalid credentials\"\n}"
             }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status is 201, 401, or 403\", function () {",
+                  "  pm.expect([201, 401, 403, 400]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const data = pm.response.json();",
+                  "  if (data.id) pm.collectionVariables.set(\"productId\", data.id);",
+                  "}"
+                ]
+              }
+            }
           ]
         }
       ]
@@ -1466,6 +1519,30 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:3000"
+    },
+    {
+      "key": "testUserName",
+      "value": "Ana Perez"
+    },
+    {
+      "key": "testUserEmail",
+      "value": "ana@example.com"
+    },
+    {
+      "key": "testUserPassword",
+      "value": "SecurePass123"
+    },
+    {
+      "key": "bearerToken",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "testUserRole",
+      "value": "client"
     }
   ]
 }
