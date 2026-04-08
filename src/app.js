@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -16,6 +17,10 @@ app.use(morgan('dev'));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'EcoHome Store API is running' });
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 app.use('/auth', authRoutes);

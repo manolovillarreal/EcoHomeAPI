@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>EcoHome Store API</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-size: 18px;
+      margin-top: 25px;
+    }
+    p {
+      line-height: 1.6;
+    }
+    code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .endpoint {
+      margin: 5px 0;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 13px;
+      color: #777;
+    }
+    a {
+      color: #2a6ebb;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <h1>EcoHome Store API</h1>
+    <p>
+      Esta API corresponde al desarrollo del backend para un caso académico de e-commerce,
+      enfocado en la gestión de productos y control de acceso mediante autenticación.
+    </p>
+
+    <h2>Descripción general</h2>
+    <p>
+      La aplicación implementa una arquitectura RESTful utilizando Node.js y PostgreSQL,
+      incorporando persistencia de datos, autenticación mediante JWT y control de roles
+      (admin y cliente).
+    </p>
+
+    <h2>Funcionalidades principales</h2>
+    <ul>
+      <li>Registro y autenticación de usuarios</li>
+      <li>Gestión de catálogo de productos (CRUD)</li>
+      <li>Protección de rutas mediante JWT</li>
+      <li>Control de acceso basado en roles</li>
+    </ul>
+
+    <h2>Endpoints principales</h2>
+    <div class="endpoint"><code>POST /auth/signup</code> – Registro de usuario</div>
+    <div class="endpoint"><code>POST /auth/login</code> – Autenticación</div>
+    <div class="endpoint"><code>GET /products</code> – Listar productos</div>
+    <div class="endpoint"><code>GET /products/:id</code> – Obtener producto</div>
+    <div class="endpoint"><code>POST /products</code> – Crear producto (admin)</div>
+    <div class="endpoint"><code>PUT /products/:id</code> – Actualizar producto (admin)</div>
+    <div class="endpoint"><code>DELETE /products/:id</code> – Eliminar producto (admin)</div>
+
+    <h2>Documentación y pruebas</h2>
+    <p>
+      La API cuenta con un archivo <code>openapi.json</code> que puede ser importado en herramientas como Postman.
+      También se incluye una colección de pruebas para validar el flujo completo de autenticación y CRUD.
+    </p>
+
+    <h2>Repositorio</h2>
+    <p>
+      Código fuente disponible en:<br>
+      <a href="https://github.com/manolovillarreal/EcoHomeAPI" target="_blank">
+        https://github.com/manolovillarreal/EcoHomeAPI
+      </a>
+    </p>
+
+    <div class="footer">
+      Proyecto académico – Desarrollo Backend<br>
+      EcoHome Store API
+    </div>
+
+  </div>
+</body>
+</html>
