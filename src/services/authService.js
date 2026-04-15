@@ -23,7 +23,9 @@ const signToken = (user) =>
   jwt.sign(
     {
       id: user.id,
-      role: user.role
+      role: user.role,
+      name: user.name,
+      email: user.email
     },
     env.jwtSecret,
     { expiresIn: env.jwtExpiresIn }
