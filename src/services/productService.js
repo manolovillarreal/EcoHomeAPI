@@ -6,11 +6,28 @@ const createError = (statusCode, message) => {
   return error;
 };
 
+const productSelectFields = `
+  p.id,
+  p.name,
+  p.price,
+  p.created_at,
+  p.updated_at,
+  p.created_by,
+  CASE
+    WHEN u.id IS NULL THEN NULL
+    ELSE json_build_object(
+      'id', u.id,
+      'name', u.name
+    )
+  END AS creator
+`;
+
 const getProducts = async () => {
   const query = `
-    SELECT id, name, price, created_at, updated_at
-    FROM products
-    ORDER BY created_at DESC
+    SELECT ${productSelectFields}
+    FROM products p
+    LEFT JOIN users u ON u.id = p.created_by
+    ORDER BY p.created_at DESC
   `;
   const { rows } = await pool.query(query);
   return rows;
@@ -18,9 +35,10 @@ const getProducts = async () => {
 
 const getProductById = async (id) => {
   const query = `
-    SELECT id, name, price, created_at, updated_at
-    FROM products
-    WHERE id = $1
+    SELECT ${productSelectFields}
+    FROM products p
+    LEFT JOIN users u ON u.id = p.created_by
+    WHERE p.id = $1
   `;
   const { rows } = await pool.query(query, [id]);
   const product = rows[0];
@@ -32,13 +50,18 @@ const getProductById = async (id) => {
   return product;
 };
 
-const createProduct = async ({ name, price }) => {
+const createProduct = async ({ name, price }, createdBy) => {
   const query = `
-    INSERT INTO products (name, price)
-    VALUES ($1, $2)
-    RETURNING id, name, price, created_at, updated_at
+    WITH inserted_product AS (
+      INSERT INTO products (name, price, created_by)
+      VALUES ($1, $2, $3)
+      RETURNING id, name, price, created_at, updated_at, created_by
+    )
+    SELECT ${productSelectFields}
+    FROM inserted_product p
+    LEFT JOIN users u ON u.id = p.created_by
   `;
-  const values = [name.trim(), price];
+  const values = [name.trim(), price, createdBy];
   const { rows } = await pool.query(query, values);
   return rows[0];
 };
@@ -63,16 +86,16 @@ const updateProduct = async (id, { name, price }) => {
     UPDATE products
     SET ${fields.join(', ')}
     WHERE id = $${values.length}
-    RETURNING id, name, price, created_at, updated_at
+    RETURNING id, name, price, created_at, updated_at, created_by
   `;
   const { rows } = await pool.query(query, values);
-  const product = rows[0];
+  const updatedProduct = rows[0];
 
-  if (!product) {
+  if (!updatedProduct) {
     throw createError(404, 'Product not found');
   }
 
-  return product;
+  return getProductById(updatedProduct.id);
 };
 
 const deleteProduct = async (id) => {

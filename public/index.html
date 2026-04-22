@@ -1,107 +1,208 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EcoHome Store API</title>
   <style>
+    :root {
+      --bg: #f1f7f2;
+      --panel: #fffdf8;
+      --ink: #203128;
+      --muted: #5a6c62;
+      --accent: #2d7a55;
+      --accent-soft: #dbeee2;
+      --border: #d6e4d9;
+      --code: #eef4ef;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
       margin: 0;
-      padding: 40px;
+      padding: 40px 20px;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(45, 122, 85, 0.14), transparent 28%),
+        linear-gradient(180deg, #f8fcf8 0%, var(--bg) 100%);
     }
+
     .container {
-      max-width: 800px;
+      max-width: 920px;
       margin: auto;
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 32px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 40px rgba(32, 49, 40, 0.08);
     }
+
+    .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
     h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
+      margin: 0 0 10px;
+      font-size: 2rem;
     }
+
     h2 {
-      font-size: 18px;
-      margin-top: 25px;
+      margin-top: 28px;
+      font-size: 1.1rem;
     }
-    p {
+
+    p, li {
       line-height: 1.6;
     }
+
+    ul {
+      padding-left: 20px;
+    }
+
     code {
-      background: #eee;
       padding: 2px 6px;
       border-radius: 4px;
+      background: var(--code);
     }
+
+    .callout {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      background: var(--accent-soft);
+    }
+
     .endpoint {
-      margin: 5px 0;
+      margin: 8px 0;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fbfdfb;
     }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7fbf8 100%);
+    }
+
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
     .footer {
       margin-top: 30px;
       font-size: 13px;
-      color: #777;
+      color: var(--muted);
     }
+
     a {
-      color: #2a6ebb;
+      color: var(--accent);
       text-decoration: none;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .container {
+        padding: 22px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    
+    <div class="badge">API REST + JWT + PostgreSQL</div>
     <h1>EcoHome Store API</h1>
     <p>
-      Esta API corresponde al desarrollo del backend para un caso académico de e-commerce,
-      enfocado en la gestión de productos y control de acceso mediante autenticación.
+      Backend academico de e-commerce construido con Node.js, Express y PostgreSQL,
+      enfocado en autenticacion con JWT, administracion de productos y trazabilidad por usuario.
     </p>
 
-    <h2>Descripción general</h2>
+    <div class="callout">
+      Los productos ahora registran <code>created_by</code> automaticamente desde el JWT y las consultas incluyen
+      un objeto <code>creator</code> con datos minimos del usuario.
+    </div>
+
+    <h2>Descripcion general</h2>
     <p>
-      La aplicación implementa una arquitectura RESTful utilizando Node.js y PostgreSQL,
-      incorporando persistencia de datos, autenticación mediante JWT y control de roles
-      (admin y cliente).
+      La aplicacion implementa una arquitectura RESTful con persistencia en PostgreSQL,
+      autenticacion mediante JWT y control de roles para flujos administrativos.
     </p>
 
     <h2>Funcionalidades principales</h2>
     <ul>
-      <li>Registro y autenticación de usuarios</li>
-      <li>Gestión de catálogo de productos (CRUD)</li>
-      <li>Protección de rutas mediante JWT</li>
-      <li>Control de acceso basado en roles</li>
+      <li>Registro y autenticacion de usuarios</li>
+      <li>Gestion de catalogo de productos con CRUD</li>
+      <li>Trazabilidad del creador del producto usando <code>req.user.id</code></li>
+      <li>Metricas del usuario autenticado con conteo de productos creados</li>
+      <li>Proteccion de rutas mediante JWT y control de roles</li>
     </ul>
 
     <h2>Endpoints principales</h2>
-    <div class="endpoint"><code>POST /auth/signup</code> – Registro de usuario</div>
-    <div class="endpoint"><code>POST /auth/login</code> – Autenticación</div>
-    <div class="endpoint"><code>GET /products</code> – Listar productos</div>
-    <div class="endpoint"><code>GET /products/:id</code> – Obtener producto</div>
-    <div class="endpoint"><code>POST /products</code> – Crear producto (admin)</div>
-    <div class="endpoint"><code>PUT /products/:id</code> – Actualizar producto (admin)</div>
-    <div class="endpoint"><code>DELETE /products/:id</code> – Eliminar producto (admin)</div>
+    <div class="endpoint"><code>POST /auth/signup</code> - Registro de usuario</div>
+    <div class="endpoint"><code>POST /auth/login</code> - Autenticacion</div>
+    <div class="endpoint"><code>GET /products</code> - Listar productos con creador</div>
+    <div class="endpoint"><code>GET /products/:id</code> - Obtener producto con creador</div>
+    <div class="endpoint"><code>POST /products</code> - Crear producto (admin, usa JWT para <code>created_by</code>)</div>
+    <div class="endpoint"><code>PATCH /products/:id</code> - Actualizar producto (admin)</div>
+    <div class="endpoint"><code>DELETE /products/:id</code> - Eliminar producto (admin)</div>
+    <div class="endpoint"><code>GET /users/me/stats</code> - Ver metricas del usuario autenticado</div>
 
-    <h2>Documentación y pruebas</h2>
+    <h2>Respuestas nuevas</h2>
+    <div class="grid">
+      <div class="card">
+        <strong>Producto con trazabilidad</strong>
+        Incluye <code>created_by</code> y <code>creator: { id, name }</code> sin exponer datos sensibles.
+      </div>
+      <div class="card">
+        <strong>Metricas del usuario</strong>
+        <code>GET /users/me/stats</code> devuelve <code>userId</code>, <code>name</code> y <code>productCount</code>.
+      </div>
+    </div>
+
+    <h2>Documentacion y pruebas</h2>
     <p>
-      La API cuenta con un archivo <code>openapi.json</code> que puede ser importado en herramientas como Postman.
-      También se incluye una colección de pruebas para validar el flujo completo de autenticación y CRUD.
+      La API cuenta con un archivo <code>openapi.json</code> para importar en Postman
+      y una coleccion lista para validar autenticacion, productos y el flujo de metricas.
     </p>
 
     <h2>Repositorio</h2>
     <p>
-      Código fuente disponible en:<br>
-      <a href="https://github.com/manolovillarreal/EcoHomeAPI" target="_blank">
+      Codigo fuente disponible en:<br>
+      <a href="https://github.com/manolovillarreal/EcoHomeAPI" target="_blank" rel="noreferrer">
         https://github.com/manolovillarreal/EcoHomeAPI
       </a>
     </p>
 
     <div class="footer">
-      Proyecto académico – Desarrollo Backend<br>
+      Proyecto academico - Desarrollo Backend<br>
       EcoHome Store API
     </div>
-
   </div>
 </body>
 </html>

@@ -6,6 +6,7 @@ const morgan = require('morgan');
 
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const userRoutes = require('./routes/userRoutes');
 const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
@@ -25,6 +26,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
+app.use('/users', userRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
