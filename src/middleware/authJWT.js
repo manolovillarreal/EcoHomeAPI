@@ -12,6 +12,11 @@ const authJWT = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, env.jwtSecret);
+
+    if (decoded.tokenType === 'refresh') {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+
     req.user = {
       id: decoded.id,
       role: decoded.role,

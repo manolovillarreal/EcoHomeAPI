@@ -136,59 +136,71 @@
 </head>
 <body>
   <div class="container">
-    <div class="badge">API REST + JWT + PostgreSQL</div>
+    <div class="badge">API REST + JWT + RBAC + PostgreSQL</div>
     <h1>EcoHome Store API</h1>
     <p>
       Backend academico de e-commerce construido con Node.js, Express y PostgreSQL,
-      enfocado en autenticacion con JWT, administracion de productos y trazabilidad por usuario.
+      con autenticacion JWT, refresh tokens, control por roles y administracion de productos.
     </p>
 
     <div class="callout">
-      Los productos ahora registran <code>created_by</code> automaticamente desde el JWT y las consultas incluyen
-      un objeto <code>creator</code> con datos minimos del usuario.
+      La API mantiene compatibilidad hacia atras en <code>GET /products</code>: sin query params devuelve
+      el arreglo tradicional, y con paginacion devuelve <code>{ data, pagination }</code>.
     </div>
 
     <h2>Descripcion general</h2>
     <p>
       La aplicacion implementa una arquitectura RESTful con persistencia en PostgreSQL,
-      autenticacion mediante JWT y control de roles para flujos administrativos.
+      autenticacion con access token y refresh token, y RBAC con roles <code>admin</code>, <code>staff</code> y <code>client</code>.
     </p>
 
     <h2>Funcionalidades principales</h2>
     <ul>
-      <li>Registro y autenticacion de usuarios</li>
+      <li>Registro y autenticacion de usuarios con JWT</li>
+      <li>Refresh tokens persistidos en PostgreSQL</li>
       <li>Gestion de catalogo de productos con CRUD</li>
+      <li>RBAC para roles admin, staff y client</li>
+      <li>Paginacion y filtro por creador en <code>GET /products</code></li>
       <li>Trazabilidad del creador del producto usando <code>req.user.id</code></li>
       <li>Metricas del usuario autenticado con conteo de productos creados</li>
-      <li>Proteccion de rutas mediante JWT y control de roles</li>
     </ul>
 
     <h2>Endpoints principales</h2>
-    <div class="endpoint"><code>POST /auth/signup</code> - Registro de usuario</div>
-    <div class="endpoint"><code>POST /auth/login</code> - Autenticacion</div>
-    <div class="endpoint"><code>GET /products</code> - Listar productos con creador</div>
+    <div class="endpoint"><code>POST /auth/signup</code> - Registro publico, siempre crea usuarios <code>client</code></div>
+    <div class="endpoint"><code>POST /auth/login</code> - Devuelve <code>accessToken</code> y <code>refreshToken</code></div>
+    <div class="endpoint"><code>POST /auth/refresh</code> - Emite un nuevo <code>accessToken</code></div>
+    <div class="endpoint"><code>GET /products</code> - Lista productos; soporta <code>page</code>, <code>limit</code> y <code>created_by</code></div>
     <div class="endpoint"><code>GET /products/:id</code> - Obtener producto con creador</div>
-    <div class="endpoint"><code>POST /products</code> - Crear producto (admin, usa JWT para <code>created_by</code>)</div>
-    <div class="endpoint"><code>PATCH /products/:id</code> - Actualizar producto (admin)</div>
-    <div class="endpoint"><code>DELETE /products/:id</code> - Eliminar producto (admin)</div>
-    <div class="endpoint"><code>GET /users/me/stats</code> - Ver metricas del usuario autenticado</div>
+    <div class="endpoint"><code>POST /products</code> - Crear producto (<code>admin</code>, <code>staff</code>)</div>
+    <div class="endpoint"><code>PATCH /products/:id</code> - Actualizacion parcial (<code>admin</code>, <code>staff</code>)</div>
+    <div class="endpoint"><code>PUT /products/:id</code> - Actualizacion completa compatible (<code>admin</code>, <code>staff</code>)</div>
+    <div class="endpoint"><code>DELETE /products/:id</code> - Eliminar producto (<code>admin</code>)</div>
+    <div class="endpoint"><code>GET /users/me/stats</code> - Ver metricas del usuario autenticado (<code>admin</code>, <code>staff</code>)</div>
 
-    <h2>Respuestas nuevas</h2>
+    <h2>Respuestas y roles</h2>
     <div class="grid">
       <div class="card">
         <strong>Producto con trazabilidad</strong>
         Incluye <code>created_by</code> y <code>creator: { id, name }</code> sin exponer datos sensibles.
       </div>
       <div class="card">
-        <strong>Metricas del usuario</strong>
-        <code>GET /users/me/stats</code> devuelve <code>userId</code>, <code>name</code> y <code>productCount</code>.
+        <strong>Login y refresh</strong>
+        <code>POST /auth/login</code> devuelve <code>token</code>, <code>accessToken</code> y <code>refreshToken</code> para compatibilidad.
+      </div>
+      <div class="card">
+        <strong>Paginacion opcional</strong>
+        Cuando se usan query params, <code>GET /products</code> responde con <code>data</code> y <code>pagination</code>.
+      </div>
+      <div class="card">
+        <strong>RBAC</strong>
+        Roles disponibles: <code>admin</code>, <code>staff</code> y <code>client</code>. Signup sigue creando usuarios <code>client</code>.
       </div>
     </div>
 
     <h2>Documentacion y pruebas</h2>
     <p>
-      La API cuenta con un archivo <code>openapi.json</code> para importar en Postman
-      y una coleccion lista para validar autenticacion, productos y el flujo de metricas.
+      La API cuenta con un archivo <code>openapi.json</code>, una coleccion de Postman y pruebas con Jest + Supertest.
+      Puedes ejecutar <code>npm test -- --verbose</code> para ver los escenarios descriptivos en consola.
     </p>
 
     <h2>Repositorio</h2>

@@ -29,4 +29,10 @@ router.post(
   authController.login
 );
 
+router.post(
+  '/refresh',
+  [body('refreshToken').isString().notEmpty().withMessage('Refresh token is required'), validateRequest],
+  authController.refresh
+);
+
 module.exports = router;

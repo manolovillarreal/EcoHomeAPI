@@ -10,8 +10,17 @@ const signup = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  try {
+  try {   
     const result = await authService.login(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const refresh = async (req, res, next) => {
+  try {
+    const result = await authService.refreshAccessToken(req.body.refreshToken);
     res.status(200).json(result);
   } catch (error) {
     next(error);
@@ -20,5 +29,6 @@ const login = async (req, res, next) => {
 
 module.exports = {
   signup,
-  login
+  login,
+  refresh
 };

@@ -1,9 +1,9 @@
-﻿{
+{
   "openapi": "3.0.3",
   "info": {
     "title": "EcoHome Store API",
     "version": "1.0.0-beta",
-    "description": "API REST para EcoHome Store."
+    "description": "API REST para EcoHome Store con JWT, refresh tokens, RBAC y productos con paginacion opcional."
   },
   "servers": [
     {
@@ -67,17 +67,28 @@
           "id": { "type": "string", "format": "uuid", "example": "5c2da17d-3d6e-4c15-aa0a-8f4d4fe9ec59" },
           "name": { "type": "string", "example": "Ana Perez" },
           "email": { "type": "string", "format": "email", "example": "ana@example.com" },
-          "role": { "type": "string", "enum": ["admin", "client"], "example": "client" },
+          "role": { "type": "string", "enum": ["admin", "staff", "client"], "example": "client" },
           "created_at": { "type": "string", "format": "date-time", "example": "2026-04-07T18:30:00.000Z" }
         }
       },
-      "AuthResponse": {
+      "SignupResponse": {
         "type": "object",
         "required": ["message", "user", "token"],
         "properties": {
-          "message": { "type": "string", "example": "Login successful" },
+          "message": { "type": "string", "example": "User created successfully" },
           "user": { "$ref": "#/components/schemas/User" },
           "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": ["message", "user", "token", "accessToken", "refreshToken"],
+        "properties": {
+          "message": { "type": "string", "example": "Login successful" },
+          "user": { "$ref": "#/components/schemas/User" },
+          "token": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.access" },
+          "accessToken": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.access" },
+          "refreshToken": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh" }
         }
       },
       "SignupRequest": {
@@ -95,6 +106,20 @@
         "properties": {
           "email": { "type": "string", "format": "email", "example": "ricardo.mantilla@uniasturias.com" },
           "password": { "type": "string", "format": "password", "example": "SecurePass123" }
+        }
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "required": ["refreshToken"],
+        "properties": {
+          "refreshToken": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.refresh" }
+        }
+      },
+      "RefreshResponse": {
+        "type": "object",
+        "required": ["accessToken"],
+        "properties": {
+          "accessToken": { "type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.access" }
         }
       },
       "Product": {
@@ -147,6 +172,26 @@
         "properties": {
           "message": { "type": "string", "example": "Product deleted successfully" }
         }
+      },
+      "PaginationMeta": {
+        "type": "object",
+        "required": ["page", "limit", "total"],
+        "properties": {
+          "page": { "type": "integer", "example": 1 },
+          "limit": { "type": "integer", "example": 10 },
+          "total": { "type": "integer", "example": 45 }
+        }
+      },
+      "PaginatedProductsResponse": {
+        "type": "object",
+        "required": ["data", "pagination"],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Product" }
+          },
+          "pagination": { "$ref": "#/components/schemas/PaginationMeta" }
+        }
       }
     }
   },
@@ -186,7 +231,7 @@
             "description": "User created",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+                "schema": { "$ref": "#/components/schemas/SignupResponse" }
               }
             }
           },
@@ -219,7 +264,7 @@
             "description": "Login successful",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/AuthResponse" }
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
               }
             }
           },
@@ -242,20 +287,97 @@
         }
       }
     },
+    "/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "operationId": "refreshAccessToken",
+        "summary": "Issue a new access token using a refresh token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RefreshRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Access token issued",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RefreshResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
     "/products": {
       "get": {
         "tags": ["Products"],
         "operationId": "getProducts",
-        "summary": "List products",
+        "summary": "List products with optional pagination and filtering",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1 },
+            "description": "Page number. If omitted together with other query params, the endpoint returns the legacy array response."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "description": "Page size."
+          },
+          {
+            "name": "created_by",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "format": "uuid" },
+            "description": "Filter products by creator user id."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Product list",
+            "description": "Product list. Returns either the legacy array format or a paginated object depending on query params.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": { "$ref": "#/components/schemas/Product" }
+                  "oneOf": [
+                    {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Product" }
+                    },
+                    { "$ref": "#/components/schemas/PaginatedProductsResponse" }
+                  ]
                 }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
               }
             }
           }
@@ -264,7 +386,7 @@
       "post": {
         "tags": ["Products"],
         "operationId": "createProduct",
-        "summary": "Create product",
+        "summary": "Create product (admin or staff)",
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
           "required": true,
@@ -353,7 +475,71 @@
       "patch": {
         "tags": ["Products"],
         "operationId": "updateProduct",
-        "summary": "Update product",
+        "summary": "Partially update product (admin or staff)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateProductRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Product" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ValidationErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Products"],
+        "operationId": "replaceProduct",
+        "summary": "Update product using PUT (admin or staff)",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
@@ -417,7 +603,7 @@
       "delete": {
         "tags": ["Products"],
         "operationId": "deleteProduct",
-        "summary": "Delete product",
+        "summary": "Delete product (admin only)",
         "security": [{ "bearerAuth": [] }],
         "parameters": [
           {
@@ -475,7 +661,7 @@
       "get": {
         "tags": ["Users"],
         "operationId": "getMyStats",
-        "summary": "Get current user product metrics",
+        "summary": "Get current user product metrics (admin or staff)",
         "security": [{ "bearerAuth": [] }],
         "responses": {
           "200": {
@@ -488,6 +674,14 @@
           },
           "401": {
             "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }
