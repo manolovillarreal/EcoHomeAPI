@@ -177,6 +177,30 @@
     <div class="endpoint"><code>DELETE /products/:id</code> - Eliminar producto (<code>admin</code>)</div>
     <div class="endpoint"><code>GET /users/me/stats</code> - Ver metricas del usuario autenticado (<code>admin</code>, <code>staff</code>)</div>
 
+    <h2>Query params de productos</h2>
+    <div class="grid">
+      <div class="card">
+        <strong><code>page</code></strong>
+        Numero de pagina. Debe ser un entero mayor que 0.
+      </div>
+      <div class="card">
+        <strong><code>limit</code></strong>
+        Cantidad de productos por pagina. Debe estar entre 1 y 100.
+      </div>
+      <div class="card">
+        <strong><code>created_by</code></strong>
+        Filtra productos por el UUID del usuario creador.
+      </div>
+      <div class="card">
+        <strong>Compatibilidad</strong>
+        Si no envias query params, <code>GET /products</code> devuelve el arreglo tradicional. Si envias alguno, responde con <code>data</code> y <code>pagination</code>.
+      </div>
+    </div>
+
+    <div class="callout">
+      Ejemplo: <code>GET /products?page=1&amp;limit=10&amp;created_by=5c2da17d-3d6e-4c15-aa0a-8f4d4fe9ec59</code>
+    </div>
+
     <h2>Respuestas y roles</h2>
     <div class="grid">
       <div class="card">

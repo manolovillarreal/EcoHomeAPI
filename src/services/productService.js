@@ -42,7 +42,8 @@ const getProducts = async ({ page, limit, created_by: createdBy } = {}) => {
       ${whereClause}
       ORDER BY p.created_at DESC
     `;
-    const { rows } = await pool.query(query, values);
+
+     const { rows } = await pool.query(query, values);
     return rows;
   }
 
